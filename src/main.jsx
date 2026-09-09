@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { Wrench, Hammer, Bath, Paintbrush, Drill, ArrowRight, Check, Images, Phone, Mail, Menu, X } from 'lucide-react';
+import { Wrench, Hammer, Bath, Paintbrush, Drill, ArrowRight, Check, Phone, Mail, Menu, X, Send, ClipboardList, MessageSquareText, CalendarCheck, FileText } from 'lucide-react';
 import './styles.css';
 import logo from './assets/logo.jpg';
 import yardBefore from './assets/projects/20210729_093803.jpg';
@@ -25,6 +25,31 @@ const services = [
 function App(){
  const [open,setOpen]=React.useState(false);
  const [compare,setCompare]=React.useState(50);
+ const [formStatus,setFormStatus]=React.useState('idle');
+ const [formMessage,setFormMessage]=React.useState('');
+
+ async function submitEstimate(event){
+   event.preventDefault();
+   setFormStatus('sending');
+   setFormMessage('');
+   const form = event.currentTarget;
+
+   try {
+     const response = await fetch('https://formsubmit.co/ajax/reiderhomeservices@gmail.com', {
+       method: 'POST',
+       headers: { Accept: 'application/json' },
+       body: new FormData(form)
+     });
+     const result = await response.json();
+     if (!response.ok || result.success === false) throw new Error('Submission failed');
+     form.reset();
+     setFormStatus('success');
+     setFormMessage("Thanks — your request has been sent. Chris will review it and get back to you.");
+   } catch {
+     setFormStatus('error');
+     setFormMessage('We could not send your request. Please call, text, or email us instead.');
+   }
+ }
  return (
    <>
      <header className='header'>
@@ -80,6 +105,32 @@ function App(){
          <i /> <span>Improvements</span>
          <i /> <span>Installations</span>
          <i /> <span>Odd Jobs</span>
+       </section>
+       <section className='processSection' id='how-it-works'>
+         <div className='section processInner'>
+           <div className='sectionHead processHead'>
+             <p className='eyebrow blue'>HOW IT WORKS</p>
+             <h2>From project idea to a plan.</h2>
+             <p>Getting started is simple. Tell us what your home needs, and Chris will help you work out the next step.</p>
+           </div>
+           <div className='processGrid'>
+             <article className='processStep'>
+               <span className='stepNumber'>01</span><ClipboardList />
+               <h3>Tell us about the project</h3>
+               <p>Use the estimate form, call, or text. Photos are helpful, but they aren't required.</p>
+             </article>
+             <article className='processStep'>
+               <span className='stepNumber'>02</span><MessageSquareText />
+               <h3>Chris follows up</h3>
+               <p>He'll ask any needed questions and discuss the scope, location, and timing with you.</p>
+             </article>
+             <article className='processStep'>
+               <span className='stepNumber'>03</span><CalendarCheck />
+               <h3>Plan the work</h3>
+               <p>If the project is a good fit, you'll arrange the estimate and schedule the next step.</p>
+             </article>
+           </div>
+         </div>
        </section>
        <section className='section' id='services'>
          <div className='sectionHead'>
@@ -207,32 +258,75 @@ function App(){
            </a>
          </div>
        </section>
+       <section className='faqSection' id='faq'>
+         <div className='section faqInner'>
+           <div className='sectionHead faqHead'>
+             <p className='eyebrow blue'>COMMON QUESTIONS</p>
+             <h2>A few things you may want to know.</h2>
+           </div>
+           <div className='faqList'>
+             <details>
+               <summary>What kinds of projects does Reider Home Services take on?</summary>
+               <p>Chris handles a wide range of home repairs, installations, maintenance, carpentry, painting, drywall, tile, and improvement projects. If you aren't sure whether your job fits, send a short description and ask.</p>
+             </details>
+             <details>
+               <summary>Do you take smaller repair jobs?</summary>
+               <p>Yes. Reider Home Services is built for both individual repairs and lists of smaller jobs that homeowners need help completing.</p>
+             </details>
+             <details>
+               <summary>Can I send photos of what needs to be done?</summary>
+               <p>Yes. You can attach a photo to the estimate request form. A clear photo can help Chris understand the project before following up.</p>
+             </details>
+             <details>
+               <summary>Do I need to know exactly what the repair requires?</summary>
+               <p>No. Describe what you see, what isn't working, or what you want changed. Chris can ask follow-up questions and help determine the next step.</p>
+             </details>
+             <details>
+               <summary>How do I request an estimate?</summary>
+               <p>Complete the estimate form below or call or text (610) 609-2427. Include the type of project, your general location, and your preferred way to be contacted.</p>
+             </details>
+           </div>
+         </div>
+       </section>
        <section className='contact' id='contact'>
          <div className='contactInner'>
-           <p className='eyebrow'>LET'S TALK ABOUT YOUR PROJECT</p>
-           <h2>What can we fix for you?</h2>
-           <p>
-             Tell us what needs attention and we'll take it from there. Call,
-             text, or email Reider Home Services to get started.
-           </p>
-           <a className='pending contactLink' href='tel:+16106092427'>
-             <Phone />
-             <div>
-               <strong>Call or text</strong>
-               <span>(610) 609-2427</span>
+           <div className='contactIntro'>
+             <p className='eyebrow blue'>REQUEST AN ESTIMATE</p>
+             <h2>Tell us about your project.</h2>
+             <p>Share a few details and Chris will follow up to discuss the work, timing, and next steps. You don't need to know exactly what the repair requires — just tell us what you're seeing.</p>
+             <div className='directContact'>
+               <p>Prefer to talk directly?</p>
+               <a className='pending contactLink' href='tel:+16106092427'>
+                 <Phone /><div><strong>Call or text</strong><span>(610) 609-2427</span></div><ArrowRight size={18} />
+               </a>
+               <a className='pending contactLink' href='mailto:reiderhomeservices@gmail.com'>
+                 <Mail /><div><strong>Email</strong><span>reiderhomeservices@gmail.com</span></div><ArrowRight size={18} />
+               </a>
              </div>
-             <ArrowRight size={18} />
-           </a>
-           <a
-             className='pending contactLink'
-             href='mailto:reiderhomeservices@gmail.com'>
-             <Mail />
-             <div>
-               <strong>Email</strong>
-               <span>reiderhomeservices@gmail.com</span>
+           </div>
+
+           <form className='estimateForm' onSubmit={submitEstimate} encType='multipart/form-data'>
+             <input type='hidden' name='_subject' value='New estimate request from the Reider Home Services website' />
+             <input type='hidden' name='_template' value='table' />
+             <input className='formTrap' type='text' name='_honey' tabIndex='-1' autoComplete='off' />
+             <div className='fieldGrid'>
+               <label>Name <span>*</span><input name='Name' type='text' autoComplete='name' required /></label>
+               <label>Phone number <span>*</span><input name='Phone' type='tel' autoComplete='tel' required /></label>
+               <label>Email address<input name='Email' type='email' autoComplete='email' /></label>
+               <label>Preferred contact <span>*</span><select name='Preferred contact method' defaultValue='' required><option value='' disabled>Choose one</option><option>Text</option><option>Phone call</option><option>Email</option></select></label>
+               <label>Service needed <span>*</span><select name='Service needed' defaultValue='' required><option value='' disabled>Select a service</option><option>General home repair</option><option>Carpentry or exterior work</option><option>Kitchen or bathroom</option><option>Painting, drywall, or finishing</option><option>Installation or improvement</option><option>Other / Not sure</option></select></label>
+               <label>City or ZIP code <span>*</span><input name='Project location' type='text' autoComplete='postal-code' required /></label>
+               <label className='fullField'>When would you like the work done?<select name='Preferred timeframe' defaultValue='Flexible'><option>As soon as possible</option><option>Within the next 1–2 weeks</option><option>Within the next month</option><option>Flexible</option></select></label>
+               <label className='fullField'>Tell us about the project <span>*</span><textarea name='Project details' rows='5' placeholder='What needs to be repaired, installed, or improved?' required /></label>
+               <label className='fullField fileField'>Add a photo <small>(optional, up to 10 MB)</small><input name='Project photo' type='file' accept='image/jpeg,image/png,image/webp' /></label>
              </div>
-             <ArrowRight size={18} />
-           </a>
+             <p className='formPrivacy'>Please don't include payment details or other sensitive information.</p>
+             <button className='submitButton' type='submit' disabled={formStatus === 'sending'}>
+               {formStatus === 'sending' ? 'Sending…' : 'Send Estimate Request'}
+               {formStatus !== 'sending' && <Send size={18} />}
+             </button>
+             {formMessage && <div className={`formNotice ${formStatus}`} role='status' aria-live='polite'>{formMessage}{formStatus === 'error' && <a href='tel:+16106092427'>Call or text (610) 609-2427</a>}</div>}
+           </form>
          </div>
        </section>
      </main>
@@ -244,6 +338,10 @@ function App(){
        </div>
        <p>© {new Date().getFullYear()} Reider Home Services</p>
      </footer>
+     <div className='mobileContactBar' aria-label='Quick contact options'>
+       <a href='tel:+16106092427'><Phone size={18} /><span>Call or Text</span></a>
+       <a className='mobileEstimate' href='#contact'><FileText size={18} /><span>Request Estimate</span></a>
+     </div>
        <Analytics />
    </>
  );
