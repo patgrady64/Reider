@@ -7,6 +7,7 @@ import yardBefore from './assets/projects/20210729_093803.jpg';
 import yardDuring from './assets/projects/20210729_093819.jpg';
 import yardAfter from './assets/projects/20210925_133754.jpg';
 import yardAfter2 from './assets/projects/20210925_133743.jpg';
+import yardAfterComparison from './assets/projects/20210925_133729.jpg';
 import deckBefore from './assets/projects/IMG_0915.jpg';
 import deckDuring from './assets/projects/IMG_20260717_195724362_PORTRAIT.jpg';
 import deckAfter from './assets/projects/IMG_20260724_201252861.jpg';
@@ -31,7 +32,6 @@ const projects = [
 
 function App(){
  const [open,setOpen]=React.useState(false);
- const [compare,setCompare]=React.useState(50);
  const [formStatus,setFormStatus]=React.useState('idle');
  const [formMessage,setFormMessage]=React.useState('');
  const [lightbox,setLightbox]=React.useState(null);
@@ -231,32 +231,14 @@ function App(){
              <p>Real work from Reider Home Services — not stock photography.</p>
            </div>
            <div className='compare'>
-             <div className='compareFrame'>
-               <img src={yardAfter} className='after' />
-               <div className='beforeWrap' style={{ width: `${compare}%` }}>
-                 <img src={yardBefore} />
-               </div>
-               <div className='divider' style={{ left: `${compare}%` }}>
-                 <span>↔</span>
-               </div>
-               <span className='label beforeLabel'>BEFORE</span>
-               <span className='label afterLabel'>AFTER</span>
-               <input
-                 aria-label='Before and after comparison'
-                 type='range'
-                 min='8'
-                 max='92'
-                 value={compare}
-                 onChange={(e) => setCompare(e.target.value)}
-               />
+             <div className='sideBySideCompare' aria-label='Outdoor project before and after photos'>
+               <figure><span>BEFORE</span><img src={yardBefore} alt='Outdoor area before the improvement work' /></figure>
+               <figure><span>AFTER</span><img src={yardAfterComparison} alt='Outdoor area after the improvement work' /></figure>
              </div>
              <div className='compareCopy'>
                <p className='eyebrow'>BEFORE → AFTER</p>
                <h3>Outdoor transformation</h3>
-               <p>
-                 Drag the slider to compare the project before and after the
-                 work.
-               </p>
+               <p>Compare the full project photos side by side, from the overgrown starting point to the cleared and finished space.</p>
              </div>
            </div>
            <div className='projectGallery'>
@@ -318,6 +300,21 @@ function App(){
                <summary>How do I request an estimate?</summary>
                <p>Complete the estimate form below or call or text (610) 609-2427. Include the type of project, your general location, and your preferred way to be contacted.</p>
              </details>
+           </div>
+         </div>
+       </section>
+       <section className='reviewsSection' id='reviews'>
+         <div className='section reviewsInner'>
+           <div className='sectionHead reviewsHead'>
+             <p className='eyebrow blue'>CUSTOMER REVIEWS</p>
+             <h2>What customers are saying.</h2>
+             <p>We’re beginning to collect feedback from completed projects.</p>
+           </div>
+           <div className='reviewsEmpty'>
+             <div className='reviewStars' aria-hidden='true'>★★★★★</div>
+             <h3>Reviews coming soon</h3>
+             <p>Had work completed by Reider Home Services? We’d be glad to hear about your experience.</p>
+             <a className='textLink blueLink' href='mailto:reiderhomeservices@gmail.com?subject=Reider%20Home%20Services%20review'>Share your feedback <ArrowRight size={18} /></a>
            </div>
          </div>
        </section>
