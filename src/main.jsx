@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { Wrench, Hammer, Bath, Paintbrush, Drill, ArrowRight, Check, Phone, Mail, Menu, X, Send, ClipboardList, MessageSquareText, CalendarCheck, FileText } from 'lucide-react';
+import { Wrench, Hammer, Bath, Paintbrush, Drill, ArrowRight, Check, Phone, Mail, Menu, X, Send, ClipboardList, MessageSquareText, CalendarCheck, FileText, ChevronLeft, ChevronRight, Trash2, Clock3 } from 'lucide-react';
 import './styles.css';
 import logo from './assets/logo.jpg';
 import yardBefore from './assets/projects/20210729_093803.jpg';
@@ -22,27 +22,78 @@ const services = [
   { icon: Drill, title:'Installation & Improvements', text:'New fixtures, hardware, and home improvements installed with care.', items:['Light fixtures','Ceiling fans','TV mounting','Blinds & curtain hardware','Grab bars','Weatherproofing'] }
 ];
 
+const projects = [
+  { title:'Outdoor transformation', summary:'From overgrown space to a finished outdoor area.', cover:yardAfter2, photos:[yardBefore, yardDuring, yardAfter, yardAfter2] },
+  { title:'Deck repair', summary:'Repair work from progress through the finished result.', cover:deckAfter, photos:[deckBefore, deckDuring, deckAfter] },
+  { title:'Tile and shower work', summary:'Interior tile and shower improvement work.', cover:shower, photos:[shower] },
+  { title:'Home repair work', summary:'Hands-on repair work in progress.', cover:concrete, photos:[concrete] }
+];
+
 function App(){
  const [open,setOpen]=React.useState(false);
  const [compare,setCompare]=React.useState(50);
  const [formStatus,setFormStatus]=React.useState('idle');
  const [formMessage,setFormMessage]=React.useState('');
+ const [lightbox,setLightbox]=React.useState(null);
+ const [selectedPhotos,setSelectedPhotos]=React.useState([]);
+
+ React.useEffect(() => {
+   if (!lightbox) return;
+   const onKeyDown = (event) => {
+     if (event.key === 'Escape') setLightbox(null);
+     if (event.key === 'ArrowLeft') changeLightboxPhoto(-1);
+     if (event.key === 'ArrowRight') changeLightboxPhoto(1);
+   };
+   document.body.classList.add('modalOpen');
+   window.addEventListener('keydown', onKeyDown);
+   return () => {
+     document.body.classList.remove('modalOpen');
+     window.removeEventListener('keydown', onKeyDown);
+   };
+ }, [lightbox]);
+
+ function changeLightboxPhoto(direction){
+   setLightbox((current) => {
+     if (!current) return current;
+     const total = projects[current.projectIndex].photos.length;
+     return { ...current, photoIndex:(current.photoIndex + direction + total) % total };
+   });
+ }
+
+ function choosePhotos(event){
+   const incoming = Array.from(event.target.files || []);
+   const available = Math.max(0, 3 - selectedPhotos.length);
+   const accepted = incoming.filter((file) => file.type.startsWith('image/')).slice(0, available);
+   setSelectedPhotos((current) => [...current, ...accepted.map((file) => ({ file, preview:URL.createObjectURL(file) }))]);
+   event.target.value = '';
+ }
+
+ function removePhoto(index){
+   setSelectedPhotos((current) => {
+     URL.revokeObjectURL(current[index].preview);
+     return current.filter((_, photoIndex) => photoIndex !== index);
+   });
+ }
 
  async function submitEstimate(event){
    event.preventDefault();
    setFormStatus('sending');
    setFormMessage('');
    const form = event.currentTarget;
+   const formData = new FormData(form);
+   selectedPhotos.forEach(({ file }) => formData.append('Project photos[]', file));
 
    try {
      const response = await fetch('https://formsubmit.co/ajax/reiderhomeservices@gmail.com', {
        method: 'POST',
        headers: { Accept: 'application/json' },
-       body: new FormData(form)
+       body: formData
      });
      const result = await response.json();
      if (!response.ok || result.success === false) throw new Error('Submission failed');
      form.reset();
+     selectedPhotos.forEach((photo) => URL.revokeObjectURL(photo.preview));
+     setSelectedPhotos([]);
      setFormStatus('success');
      setFormMessage("Thanks — your request has been sent. Chris will review it and get back to you.");
    } catch {
@@ -208,31 +259,13 @@ function App(){
                </p>
              </div>
            </div>
-           <div className='gallery'>
-             <figure>
-               <img src={yardAfter2} />
-               <figcaption>Finished outdoor improvement</figcaption>
-             </figure>
-             <figure>
-               <img src={deckDuring} />
-               <figcaption>Deck repair in progress</figcaption>
-             </figure>
-             <figure>
-               <img src={deckAfter} />
-               <figcaption>Finished deck work</figcaption>
-             </figure>
-             <figure>
-               <img src={shower} />
-               <figcaption>Tile & shower work</figcaption>
-             </figure>
-             <figure>
-               <img src={concrete} />
-               <figcaption>Repair work in progress</figcaption>
-             </figure>
-             <figure>
-               <img src={yardDuring} />
-               <figcaption>Project transformation</figcaption>
-             </figure>
+           <div className='projectGallery'>
+             {projects.map((project, projectIndex) => (
+               <button className='projectCard' key={project.title} type='button' onClick={() => setLightbox({ projectIndex, photoIndex:0 })}>
+                 <span className='projectImage'><img src={project.cover} alt='' /><span>{project.photos.length} {project.photos.length === 1 ? 'photo' : 'photos'}</span></span>
+                 <span className='projectCardCopy'><strong>{project.title}</strong><small>{project.summary}</small><em>View project <ArrowRight size={16} /></em></span>
+               </button>
+             ))}
            </div>
          </div>
        </section>
@@ -294,6 +327,10 @@ function App(){
              <p className='eyebrow blue'>REQUEST AN ESTIMATE</p>
              <h2>Tell us about your project.</h2>
              <p>Share a few details and Chris will follow up to discuss the work, timing, and next steps. You don't need to know exactly what the repair requires — just tell us what you're seeing.</p>
+             <div className='availabilityCard'>
+               <Clock3 />
+               <div><strong>Scheduling and availability</strong><p>Chris reviews each request personally. Availability depends on the type of work and project location, and scheduling is confirmed during follow-up. Submitting this form does not create an appointment.</p></div>
+             </div>
              <div className='directContact'>
                <p>Prefer to talk directly?</p>
                <a className='pending contactLink' href='tel:+16106092427'>
@@ -318,7 +355,8 @@ function App(){
                <label>City or ZIP code <span>*</span><input name='Project location' type='text' autoComplete='postal-code' required /></label>
                <label className='fullField'>When would you like the work done?<select name='Preferred timeframe' defaultValue='Flexible'><option>As soon as possible</option><option>Within the next 1–2 weeks</option><option>Within the next month</option><option>Flexible</option></select></label>
                <label className='fullField'>Tell us about the project <span>*</span><textarea name='Project details' rows='5' placeholder='What needs to be repaired, installed, or improved?' required /></label>
-               <label className='fullField fileField'>Add a photo <small>(optional, up to 10 MB)</small><input name='Project photo' type='file' accept='image/jpeg,image/png,image/webp' /></label>
+               <label className='fullField fileField'>Add photos <small>(optional, up to 3)</small><input type='file' accept='image/jpeg,image/png,image/webp' multiple onChange={choosePhotos} disabled={selectedPhotos.length >= 3} /></label>
+               {selectedPhotos.length > 0 && <div className='fullField photoPreviews' aria-label='Selected project photos'>{selectedPhotos.map((photo,index) => <figure key={photo.preview}><img src={photo.preview} alt={`Selected project photo ${index + 1}`} /><button type='button' onClick={() => removePhoto(index)} aria-label={`Remove selected photo ${index + 1}`}><Trash2 size={16} /></button><figcaption>{photo.file.name}</figcaption></figure>)}</div>}
              </div>
              <p className='formPrivacy'>Please don't include payment details or other sensitive information.</p>
              <button className='submitButton' type='submit' disabled={formStatus === 'sending'}>
@@ -342,6 +380,16 @@ function App(){
        <a href='tel:+16106092427'><Phone size={18} /><span>Call or Text</span></a>
        <a className='mobileEstimate' href='#contact'><FileText size={18} /><span>Request Estimate</span></a>
      </div>
+     {lightbox && (
+       <div className='lightbox' role='dialog' aria-modal='true' aria-label={`${projects[lightbox.projectIndex].title} photo gallery`} onMouseDown={(event) => { if (event.target === event.currentTarget) setLightbox(null); }}>
+         <button className='lightboxClose' type='button' onClick={() => setLightbox(null)} aria-label='Close gallery'><X /></button>
+         <div className='lightboxContent'>
+           <img src={projects[lightbox.projectIndex].photos[lightbox.photoIndex]} alt={`${projects[lightbox.projectIndex].title}, photo ${lightbox.photoIndex + 1} of ${projects[lightbox.projectIndex].photos.length}`} />
+           <div className='lightboxCaption'><div><strong>{projects[lightbox.projectIndex].title}</strong><span>Photo {lightbox.photoIndex + 1} of {projects[lightbox.projectIndex].photos.length}</span></div></div>
+         </div>
+         {projects[lightbox.projectIndex].photos.length > 1 && <><button className='lightboxNav previous' type='button' onClick={() => changeLightboxPhoto(-1)} aria-label='Previous photo'><ChevronLeft /></button><button className='lightboxNav next' type='button' onClick={() => changeLightboxPhoto(1)} aria-label='Next photo'><ChevronRight /></button></>}
+       </div>
+     )}
        <Analytics />
    </>
  );
