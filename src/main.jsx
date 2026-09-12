@@ -254,7 +254,7 @@ function App() {
             <h1>
               Loving Your Home
               <br />
-              Almost as Much as You Do.
+              Almost as Much as You
             </h1>
             <p className='lead'>
               Repairs, installations, improvements, and the jobs around the
