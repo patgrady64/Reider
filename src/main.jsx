@@ -252,7 +252,7 @@ function App() {
               HOME REPAIR • IMPROVEMENTS • HANDYMAN SERVICES
             </p>
             <h1>
-              <h1>Loving Your Home Almost as Much as You.</h1>
+              <h1>Loving Your Home Almost as Much as You</h1>
             </h1>
             <p className='lead'>
               Repairs, installations, improvements, and the jobs around the
